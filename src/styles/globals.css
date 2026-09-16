@@ -1,0 +1,604 @@
+@import 'tailwindcss';
+/* Utilitários de entrada/saída (animate-in, fade-in, zoom-in…) usados pelos
+   componentes Radix. Substitui o `tailwindcss-animate` no Tailwind v4. */
+@import 'tw-animate-css';
+
+/* =============================================================================
+   ALCANCE ISENÇÕES — Design System
+   Fonte única da verdade visual. Nenhum componente deve usar cor literal
+   (hex/rgb) ou classe de cor crua (`text-white`, `bg-black`, `bg-[#...]`).
+   Paleta derivada de https://alcanceisencoes.com.br/ (roxo + laranja + lilás).
+   ========================================================================== */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* --- 1. Tokens primitivos (marca) ---------------------------------------- */
+:root {
+  /* Roxo — cor institucional */
+  --brand-roxo: #840da8;
+  --brand-roxo-vivo: #a12ec4;
+  --brand-roxo-escuro: #5c0977;
+  --brand-roxo-profundo: #2e0640;
+  --brand-roxo-tinta: #1c0327;
+
+  /* Laranja — ação e destaque */
+  --brand-laranja: #d84d1c;
+  --brand-laranja-acao: #c4451a; /* contraste AA com texto branco */
+  --brand-laranja-claro: #f0855c;
+
+  /* Neutros da marca */
+  --brand-tinta: #241a2b;
+  --brand-tinta-suave: #5f5368;
+  --brand-papel: #ffffff;
+  --brand-lavanda: #f8f2fb;
+  --brand-lavanda-2: #efe1f6;
+  --brand-areia: #fdf4ef;
+  --brand-linha: #e7d9ee;
+  --brand-ouro: #d99700;
+
+  /* --- 2. Tokens semânticos — tema claro --------------------------------- */
+  --background: #f7f4fa;
+  --foreground: #241a2b;
+
+  --surface: #ffffff;
+  --surface-muted: #faf7fc;
+  --surface-sunken: #f2ecf7;
+
+  --card: #ffffff;
+  --card-foreground: #241a2b;
+
+  --popover: #ffffff;
+  --popover-foreground: #241a2b;
+
+  --primary: #840da8;
+  --primary-hover: #6f0b8e;
+  --primary-foreground: #ffffff;
+  --primary-soft: #f3e6f9;
+  --primary-soft-foreground: #5c0977;
+
+  --secondary: #efe1f6;
+  --secondary-foreground: #4b0a61;
+  --secondary-hover: #e6d1f1;
+
+  --accent: #c4451a;
+  --accent-hover: #a93a13;
+  --accent-foreground: #ffffff;
+  --accent-soft: #fdf0ea;
+  --accent-soft-foreground: #9c3510;
+
+  --muted: #f2ecf7;
+  --muted-foreground: #5f5368;
+
+  --border: #e7d9ee;
+  --border-strong: #d6c1e3;
+  --input: #ffffff;
+  --input-border: #dbc9e6;
+  --ring: #a12ec4;
+
+  /* Estados semânticos */
+  --success: #0f7a52;
+  --success-foreground: #ffffff;
+  --success-soft: #e3f6ee;
+  --success-soft-foreground: #0b5c3e;
+
+  --warning: #9a6a00;
+  --warning-foreground: #ffffff;
+  --warning-soft: #fdf3dd;
+  --warning-soft-foreground: #7a5400;
+
+  --danger: #b3261e;
+  --danger-foreground: #ffffff;
+  --danger-soft: #fdeceb;
+  --danger-soft-foreground: #8c1d17;
+
+  --info: #1d4ed8;
+  --info-foreground: #ffffff;
+  --info-soft: #e8eefc;
+  --info-soft-foreground: #1739a3;
+
+  --neutral-soft: #efebf3;
+  --neutral-soft-foreground: #524860;
+
+  /* Véu de diálogos e painéis */
+  --overlay: rgba(46, 6, 64, 0.55);
+
+  /* Texto sobre o gradiente institucional — igual nos dois temas, porque o
+     gradiente também é. */
+  --on-brand: #ffffff;
+  --on-brand-muted: rgba(255, 255, 255, 0.76);
+  --on-brand-subtle: rgba(255, 255, 255, 0.16);
+
+  /* --- Gráficos -----------------------------------------------------------
+     Validados com o script de paleta (OKLCH, daltonismo e contraste) contra a
+     superfície real do cartão. Não altere um valor sem validar de novo —
+     resultados em docs/visualizacao-de-dados.md.
+     Categórico, ordem fixa: roxo → laranja → azul → ouro. */
+  --chart-1: #8f1bb3;
+  --chart-2: #d9571a;
+  --chart-3: #2a78d6;
+  --chart-4: #a87a00;
+  /* Ordinal (etapas em sequência): um só matiz, claro → escuro. */
+  --chart-seq-1: #b97ad6;
+  --chart-seq-2: #9d45c3;
+  --chart-seq-3: #7f16a0;
+  --chart-seq-4: #560b70;
+  /* Contexto (sparklines), grade e eixos: recessivos. */
+  --chart-muted: #b8a5c4;
+  --chart-grid: #efe6f4;
+  --chart-axis: #d6c1e3;
+
+  /* Sidebar (superfície escura institucional) */
+  --sidebar: #2e0640;
+  --sidebar-foreground: #f3e8f8;
+  --sidebar-muted-foreground: #bda3cc;
+  --sidebar-border: #451060;
+  --sidebar-item-hover: #451060;
+  --sidebar-item-active: #5c0977;
+  --sidebar-accent: #f0855c;
+
+  /* Raios */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* Sombras */
+  --shadow-xs: 0 1px 2px rgba(46, 6, 64, 0.06);
+  --shadow-sm: 0 4px 14px rgba(46, 6, 64, 0.06);
+  --shadow-md: 0 12px 30px rgba(46, 6, 64, 0.1);
+  --shadow-lg: 0 24px 60px rgba(46, 6, 64, 0.16);
+  --shadow-ring: 0 0 0 3px rgba(161, 46, 196, 0.28);
+
+  /* Tipografia */
+  /* A mesma família do site (DM Sans variável, pesos 100–1000 e eixo óptico),
+     servida pelo próprio app: sem requisição a terceiros e disponível no PWA. */
+  --font-sans:
+    'DM Sans Variable', 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Layout */
+  --header-height: 60px;
+  --sidebar-width: 268px;
+  --sidebar-width-collapsed: 72px;
+  --bottom-nav-height: 64px;
+
+  /* Movimento */
+  --ease-out-brand: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+
+  color-scheme: light;
+}
+
+/* --- 3. Tema escuro ------------------------------------------------------- */
+.dark {
+  --background: #17081f;
+  --foreground: #f4edf7;
+
+  --surface: #221031;
+  --surface-muted: #2a1539;
+  --surface-sunken: #1c0b27;
+
+  --card: #221031;
+  --card-foreground: #f4edf7;
+
+  --popover: #2a1539;
+  --popover-foreground: #f4edf7;
+
+  --primary: #c46ae0;
+  --primary-hover: #d489ea;
+  --primary-foreground: #1c0327;
+  --primary-soft: #3a1150;
+  --primary-soft-foreground: #e5c4f2;
+
+  --secondary: #38184c;
+  --secondary-foreground: #ecd9f5;
+  --secondary-hover: #452060;
+
+  --accent: #f0855c;
+  --accent-hover: #f79b78;
+  --accent-foreground: #2b0d04;
+  --accent-soft: #46201a;
+  --accent-soft-foreground: #f9c3ae;
+
+  --muted: #2c163;
+  --muted: #2b1639;
+  --muted-foreground: #bda3cc;
+
+  --border: #3a1e4c;
+  --border-strong: #4d2a63;
+  --input: #2a1539;
+  --input-border: #4a2760;
+  --ring: #c46ae0;
+
+  --success: #34d399;
+  --success-foreground: #05241a;
+  --success-soft: #10352a;
+  --success-soft-foreground: #8ee9c7;
+
+  --warning: #f0b429;
+  --warning-foreground: #2b1d00;
+  --warning-soft: #3a2c08;
+  --warning-soft-foreground: #f7d98a;
+
+  --danger: #f87171;
+  --danger-foreground: #2c0606;
+  --danger-soft: #3f1616;
+  --danger-soft-foreground: #fbb4b4;
+
+  --info: #7ea5f8;
+  --info-foreground: #06142f;
+  --info-soft: #182648;
+  --info-soft-foreground: #b7cbfb;
+
+  --neutral-soft: #2e1c3c;
+  --neutral-soft-foreground: #c5b4d1;
+
+  --overlay: rgba(8, 2, 12, 0.7);
+
+  /* Gráficos no tema escuro: passos próprios, validados contra #221031 — não
+     é uma inversão automática do tema claro. */
+  --chart-1: #b25ad3;
+  --chart-2: #d95926;
+  --chart-3: #3987e5;
+  --chart-4: #c98500;
+  /* No escuro o ordinal inverte a âncora: a etapa final é a mais clara. */
+  --chart-seq-1: #7d3aa3;
+  --chart-seq-2: #9d5cc4;
+  --chart-seq-3: #bf86de;
+  --chart-seq-4: #dcb4f0;
+  --chart-muted: #6b5a7a;
+  --chart-grid: #2f1840;
+  --chart-axis: #4d2a63;
+
+  --sidebar: #12061a;
+  --sidebar-foreground: #f0e6f5;
+  --sidebar-muted-foreground: #a992ba;
+  --sidebar-border: #2d1240;
+  --sidebar-item-hover: #2a1039;
+  --sidebar-item-active: #45185c;
+  --sidebar-accent: #f0855c;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-ring: 0 0 0 3px rgba(196, 106, 224, 0.35);
+
+  color-scheme: dark;
+}
+
+/* --- 4. Ponte com o Tailwind --------------------------------------------- */
+@theme inline {
+  --font-sans: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-sunken: var(--surface-sunken);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-foreground: var(--primary-soft-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-foreground: var(--accent-soft-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-input-border: var(--input-border);
+  --color-ring: var(--ring);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-success-soft-foreground: var(--success-soft-foreground);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-soft-foreground: var(--warning-soft-foreground);
+
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-soft-foreground: var(--danger-soft-foreground);
+
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-info-soft-foreground: var(--info-soft-foreground);
+
+  --color-neutral-soft: var(--neutral-soft);
+  --color-neutral-soft-foreground: var(--neutral-soft-foreground);
+  --color-overlay: var(--overlay);
+
+  --color-on-brand: var(--on-brand);
+  --color-on-brand-muted: var(--on-brand-muted);
+  --color-on-brand-subtle: var(--on-brand-subtle);
+  --color-brand-roxo: var(--brand-roxo);
+  --color-brand-laranja-claro: var(--brand-laranja-claro);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-muted: var(--chart-muted);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted-foreground: var(--sidebar-muted-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-item-hover: var(--sidebar-item-hover);
+  --color-sidebar-item-active: var(--sidebar-item-active);
+  --color-sidebar-accent: var(--sidebar-accent);
+
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+}
+
+/* --- 5. Base -------------------------------------------------------------- */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* O eixo óptico ajusta o desenho das letras ao tamanho, como no site. */
+    font-optical-sizing: auto;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 700;
+    letter-spacing: -0.028em;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  /* Scrollbar discreta, coerente com a paleta */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+    background-clip: content-box;
+  }
+}
+
+/* --- 6. Utilitários de superfície ----------------------------------------- */
+@utility alc-surface {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+@utility alc-gradient {
+  background-image: linear-gradient(135deg, var(--brand-roxo) 0%, var(--brand-roxo-vivo) 100%);
+}
+
+@utility alc-gradient-deep {
+  background-image: linear-gradient(160deg, var(--brand-roxo-profundo) 0%, var(--brand-roxo) 100%);
+}
+
+@utility alc-gradient-accent {
+  background-image: linear-gradient(135deg, var(--brand-laranja-acao) 0%, var(--brand-laranja-claro) 100%);
+}
+
+/* Halo decorativo usado em cabeçalhos e telas de autenticação */
+@utility alc-halo {
+  background-image:
+    radial-gradient(60rem 30rem at 110% -10%, color-mix(in srgb, var(--brand-roxo) 16%, transparent), transparent 70%),
+    radial-gradient(40rem 24rem at -10% 0%, color-mix(in srgb, var(--brand-laranja) 12%, transparent), transparent 70%);
+}
+
+@utility alc-skeleton {
+  background-image: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    color-mix(in srgb, var(--muted) 55%, var(--surface)) 37%,
+    var(--muted) 63%
+  );
+  background-size: 400% 100%;
+  animation: alc-shimmer 1.4s ease infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes alc-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* Conteúdo sensível desfocado até ação explícita do usuário */
+@utility alc-blur-sensitive {
+  filter: blur(6px);
+  user-select: none;
+  transition: filter var(--duration-base) var(--ease-out-brand);
+}
+
+/* --- Tipografia da marca (extraída do site) ------------------------------- */
+
+/* Título de destaque: peso 800 e espaçamento apertado, como `.titulo` no site. */
+@utility alc-titulo-display {
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+/* Números em destaque. Algarismos proporcionais: `tabular-nums` deixaria um
+   número grande com aparência espaçada. */
+@utility alc-numero {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: proportional-nums;
+}
+
+/* "Chapéu": rótulo em caixa alta com traço laranja à frente (`.chapeu` do site).
+   A cor vem de quem usa, para funcionar sobre fundo claro e sobre o gradiente. */
+@utility alc-chapeu {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+
+  &::before {
+    content: '';
+    width: 22px;
+    height: 3px;
+    flex: none;
+    border-radius: 99px;
+    background: var(--brand-laranja);
+  }
+}
+
+/* Palavra-chave com traço pintado por baixo (`.destaque` do site). */
+@utility alc-destaque {
+  position: relative;
+  z-index: 0;
+  white-space: nowrap;
+
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset-inline: -0.08em;
+    bottom: 0.06em;
+    height: 0.28em;
+    border-radius: 99px;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--brand-laranja) 45%, transparent),
+      color-mix(in srgb, var(--brand-laranja) 70%, transparent)
+    );
+    transform: rotate(-1deg);
+  }
+}
+
+/* Textura de pontos discreta para superfícies com gradiente. */
+@utility alc-textura-pontos {
+  background-image: radial-gradient(var(--on-brand-subtle) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Linha que se desenha uma única vez ao montar (usar com pathLength="1"). */
+@utility alc-desenhar {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: alc-desenhar 900ms var(--ease-out-brand) both;
+}
+
+@keyframes alc-desenhar {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* --- 7. Preferência por movimento reduzido -------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- 8. Impressão --------------------------------------------------------- */
+@media print {
+  [data-print='hide'] {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+}
