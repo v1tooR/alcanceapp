@@ -62,6 +62,9 @@ export const chaves = {
     lista: () => [...chaves.usuarios.todos, 'lista'] as const,
     equipe: () => [...chaves.usuarios.todos, 'equipe'] as const,
   },
+  integracoes: {
+    todos: ['integracoes'] as const,
+  },
   portal: {
     todos: ['portal'] as const,
     visaoGeral: (clienteId: ID) => [...chaves.portal.todos, 'visao-geral', clienteId] as const,

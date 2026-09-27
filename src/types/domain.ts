@@ -261,6 +261,8 @@ export interface Documento {
   arquivoNome?: string
   arquivoTamanhoBytes?: number
   arquivoMime?: string
+  /** Há arquivo guardado no armazenamento, que a equipe pode abrir. */
+  arquivoDisponivel?: boolean
   solicitadoEm?: ISODateTime
   solicitadoPorId?: ID
   prazoEnvio?: ISODate
@@ -388,6 +390,33 @@ export interface RegistroFinanceiro {
   observacoes?: string
   criadoEm: ISODateTime
   atualizadoEm: ISODateTime
+}
+
+/* ========================================================================== */
+/* Integrações                                                                 */
+/* ========================================================================== */
+
+export const CATEGORIAS_INTEGRACAO = ['email', 'storage', 'antivirus'] as const
+export type CategoriaIntegracao = (typeof CATEGORIAS_INTEGRACAO)[number]
+
+/** Integração externa. Nunca traz segredos — só se estão configurados. */
+export interface Integracao {
+  id: ID
+  chave: string
+  nome: string
+  categoria: CategoriaIntegracao
+  provedor: string
+  descricao?: string
+  habilitada: boolean
+  /** Configuração não sensível. */
+  configuracao: Record<string, unknown>
+  atualizadaEm: ISODateTime
+  /** Situação observada agora no servidor. */
+  disponivel: boolean
+  detalhe: string
+  provedoresDisponiveis: string[]
+  /** `configurado: null` = segredo de outro serviço, não verificável daqui. */
+  segredos: Array<{ nome: string; configurado: boolean | null }>
 }
 
 /* ========================================================================== */

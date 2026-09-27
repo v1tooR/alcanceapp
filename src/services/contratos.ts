@@ -4,6 +4,7 @@ import type {
   Documento,
   Etapa,
   EventoCalendario,
+  Integracao,
   ID,
   ISODate,
   Movimentacao,
@@ -76,6 +77,8 @@ export interface ServicoAutenticacao {
   /** Recupera a sessão vigente ao abrir o app; `null` quando não há. */
   sessaoAtual(): Promise<SessaoUsuario | null>
   solicitarRecuperacaoSenha(email: string): Promise<void>
+  /** Define a senha da sessão aberta por um link de convite ou recuperação. */
+  definirNovaSenha(senha: string): Promise<SessaoUsuario>
 }
 
 /* ========================================================================== */
@@ -285,20 +288,17 @@ export interface ServicoDocumentos {
   obter(id: ID): Promise<DocumentoListado>
   solicitar(dados: EntradaSolicitacaoDocumento): Promise<Documento>
   /**
-   * Registra o envio de um arquivo.
-   *
-   * O upload real (assinatura de URL, antivírus, criptografia em repouso) é
-   * responsabilidade do serviço de armazenamento — aqui só trafegam os metadados.
+   * Envia o arquivo de um documento: grava no armazenamento privado e registra
+   * no servidor, que confere permissão, formato, tamanho e antivírus.
    */
-  registrarEnvio(
-    id: ID,
-    arquivo: { nome: string; tamanhoBytes: number; mime: string },
-  ): Promise<Documento>
+  registrarEnvio(id: ID, arquivo: File): Promise<Documento>
   aprovar(id: ID, observacoesInternas?: string): Promise<Documento>
   reprovar(id: ID, motivo: string): Promise<Documento>
   solicitarReenvio(id: ID, motivo: string, novoPrazo?: ISODate): Promise<Documento>
   colocarEmAnalise(id: ID): Promise<Documento>
   alterarVisibilidade(id: ID, visibilidade: VisibilidadeDocumento): Promise<Documento>
+  /** URL temporária para a equipe abrir o arquivo. O acesso fica registrado. */
+  abrirArquivo(id: ID): Promise<string>
 }
 
 /* ========================================================================== */
@@ -557,11 +557,49 @@ export interface ServicoPortal {
   visaoGeral(clienteId: ID): Promise<VisaoPortal>
   processo(clienteId: ID, processoId: ID): Promise<ProcessoDetalhado>
   documentos(clienteId: ID): Promise<Documento[]>
-  enviarDocumento(
-    clienteId: ID,
-    documentoId: ID,
-    arquivo: { nome: string; tamanhoBytes: number; mime: string },
-  ): Promise<Documento>
+  enviarDocumento(clienteId: ID, documentoId: ID, arquivo: File): Promise<Documento>
+}
+
+/* ========================================================================== */
+/* Integrações                                                                 */
+/* ========================================================================== */
+
+export interface EntradaIntegracao {
+  habilitada?: boolean
+  provedor?: string
+  configuracao?: Record<string, unknown>
+}
+
+/* ========================================================================== */
+/* Tempo real                                                                  */
+/* ========================================================================== */
+
+/** Tabelas cujas mudanças são avisadas em tempo real. */
+export type TabelaObservada =
+  | 'clients'
+  | 'client_health_profiles'
+  | 'processes'
+  | 'subprocesses'
+  | 'process_steps'
+  | 'documents'
+  | 'process_movements'
+  | 'notifications'
+  | 'calendar_events'
+  | 'financial_records'
+  | 'profiles'
+  | 'integrations'
+
+export interface ServicoTempoReal {
+  /**
+   * Assina os canais do usuário e avisa qual tabela mudou (só o sinal, nunca
+   * os dados: quem recebe relê pela API). Devolve a função de cancelamento.
+   */
+  assinar(canais: string[], aoMudar: (tabela: TabelaObservada) => void): () => void
+}
+
+export interface ServicoIntegracoes {
+  listar(): Promise<Integracao[]>
+  atualizar(id: ID, dados: EntradaIntegracao): Promise<void>
 }
 
 /* ========================================================================== */
@@ -580,4 +618,6 @@ export interface Servicos {
   usuarios: ServicoUsuarios
   painel: ServicoPainel
   portal: ServicoPortal
+  integracoes: ServicoIntegracoes
+  tempoReal: ServicoTempoReal
 }

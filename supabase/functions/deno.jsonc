@@ -1,0 +1,6 @@
+{
+  // Mapa de importações comum a todas as Edge Functions (lido pelo roteador `main`).
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.117.2"
+  }
+}

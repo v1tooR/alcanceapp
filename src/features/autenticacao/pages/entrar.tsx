@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { rotaInicial } from '@/lib/permissoes'
 import { esquemaLogin, type DadosLogin } from '@/schemas'
-import { USANDO_DADOS_SIMULADOS } from '@/services'
 import { usarSessao } from '@/stores/sessao'
 
 export default function Entrar() {
@@ -46,31 +45,6 @@ export default function Entrar() {
     <AuthLayout
       titulo="Entrar"
       descricao="Use as credenciais fornecidas pela equipe Alcance."
-      rodape={
-        USANDO_DADOS_SIMULADOS ? (
-          <div className="rounded-md border border-border bg-surface-muted p-3.5">
-            <p className="text-xs font-bold">Ambiente de demonstração</p>
-            <p className="mt-1 text-xs text-muted-foreground leading-snug">
-              Use uma das contas fictícias abaixo com a senha{' '}
-              <code className="rounded-xs bg-muted px-1 py-0.5 font-semibold">alcance2026</code>.
-            </p>
-            <ul className="mt-2 space-y-0.5 text-xs text-muted-foreground">
-              <li>
-                <span className="font-semibold text-foreground">helena@alcanceisencoes.com.br</span>{' '}
-                — administração
-              </li>
-              <li>
-                <span className="font-semibold text-foreground">tatiane@alcanceisencoes.com.br</span>{' '}
-                — analista
-              </li>
-              <li className="pt-1">
-                Para a área do cliente, use o e-mail de um cliente com acesso liberado (ver tela de
-                clientes).
-              </li>
-            </ul>
-          </div>
-        ) : null
-      }
     >
       <form onSubmit={handleSubmit(aoEnviar)} className="space-y-4" noValidate>
         {erro && <Alert tom="perigo">{erro}</Alert>}

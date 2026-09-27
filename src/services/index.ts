@@ -1,27 +1,14 @@
 import type { Servicos } from '@/services/contratos'
-import { criarServicosSimulados } from '@/services/mock'
-import { criarServicosHttp } from '@/services/http'
+import { criarServicosSupabase } from '@/services/supabase'
 
 /**
  * Ponto único de acesso a dados.
  *
- * Nenhuma página importa `mock` ou `http` diretamente: elas dependem apenas dos
- * contratos. Trocar `VITE_MODO_DADOS` para `api` liga o back-end real sem
- * alterar componentes.
+ * Nenhuma página importa o Supabase diretamente: elas dependem apenas dos
+ * contratos em `contratos.ts`, implementados pelo adaptador em `supabase/`.
+ * Configuração: VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY (ver .env.example).
  */
-
-export type ModoDados = 'simulado' | 'api'
-
-export const MODO_DADOS: ModoDados =
-  (import.meta.env.VITE_MODO_DADOS as ModoDados | undefined) ?? 'simulado'
-
-const URL_API = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api'
-
-export const servicos: Servicos =
-  MODO_DADOS === 'api' ? criarServicosHttp(URL_API) : criarServicosSimulados()
-
-/** `true` enquanto a aplicação roda sobre dados fictícios de desenvolvimento. */
-export const USANDO_DADOS_SIMULADOS = MODO_DADOS === 'simulado'
+export const servicos: Servicos = criarServicosSupabase()
 
 export * from '@/services/contratos'
 export { ErroDeServico } from '@/services/erros'

@@ -8,9 +8,17 @@ import { RadioCampo, RadioGroup } from '@/components/ui/radio-group'
 import { Switch } from '@/components/ui/switch'
 import { CATALOGO_SUBPROCESSOS, ORDEM_SUBPROCESSOS } from '@/lib/catalogo-subprocessos'
 import { ROTULO_PAPEL } from '@/lib/rotulos'
-import { MODO_DADOS, USANDO_DADOS_SIMULADOS } from '@/services'
 import { usarPreferencias, type Tema } from '@/stores/preferencias'
 import { usarSessao } from '@/stores/sessao'
+
+/** Só o endereço do servidor (nunca chaves) — para saber a qual ambiente o app está ligado. */
+const SERVIDOR = (() => {
+  try {
+    return new URL(String(import.meta.env.VITE_SUPABASE_URL ?? '')).host || 'não configurado'
+  } catch {
+    return 'não configurado'
+  }
+})()
 
 const OPCOES_TEMA: Array<{ valor: Tema; rotulo: string; descricao: string; icone: typeof Sun }> = [
   { valor: 'claro', rotulo: 'Claro', descricao: 'Padrão da marca, melhor para o uso diurno.', icone: Sun },
@@ -107,8 +115,8 @@ export default function Configuracoes() {
             </dl>
 
             <Alert tom="info" className="mt-4">
-              A troca de senha e a autenticação em duas etapas dependem do serviço de autenticação a
-              ser integrado.
+              Para trocar a senha, use “Esqueci minha senha” na tela de entrada: o link chega por
+              e-mail.
             </Alert>
           </CardContent>
         </Card>
@@ -122,17 +130,14 @@ export default function Configuracoes() {
                 <Database className="size-4" aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold">
-                  Origem dos dados:{' '}
-                  {USANDO_DADOS_SIMULADOS ? 'base fictícia de desenvolvimento' : 'API integrada'}
-                </p>
+                <p className="text-sm font-semibold">Origem dos dados: Supabase</p>
                 <p className="mt-0.5 text-xs text-muted-foreground leading-snug">
-                  Definida por <code className="rounded-xs bg-muted px-1">VITE_MODO_DADOS</code>{' '}
-                  (atual: <code className="rounded-xs bg-muted px-1">{MODO_DADOS}</code>).
+                  Servidor <code className="rounded-xs bg-muted px-1">{SERVIDOR}</code>, definido por{' '}
+                  <code className="rounded-xs bg-muted px-1">VITE_SUPABASE_URL</code>.
                 </p>
               </div>
-              <Badge tom={USANDO_DADOS_SIMULADOS ? 'alerta' : 'sucesso'}>
-                {USANDO_DADOS_SIMULADOS ? 'Demonstração' : 'Produção'}
+              <Badge tom={SERVIDOR === 'não configurado' ? 'alerta' : 'sucesso'}>
+                {SERVIDOR === 'não configurado' ? 'Sem servidor' : 'Conectado'}
               </Badge>
             </div>
           </CardContent>

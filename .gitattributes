@@ -1,0 +1,8 @@
+# Scripts e configs executados dentro dos containers precisam de LF,
+# mesmo em checkout no Windows (core.autocrlf=true).
+*.sh text eol=lf
+docker/** text eol=lf
+supabase/** text eol=lf
+
+# Gerado por `npm run db:types`.
+src/services/supabase/database.types.ts linguist-generated=true

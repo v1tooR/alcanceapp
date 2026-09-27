@@ -168,11 +168,7 @@ function ItemEnvio({ documento, clienteId }: { documento: Documento; clienteId: 
 
   const enviar = useMutation({
     mutationFn: (arquivo: File) =>
-      servicos.portal.enviarDocumento(clienteId, documento.id, {
-        nome: arquivo.name,
-        tamanhoBytes: arquivo.size,
-        mime: arquivo.type,
-      }),
+      servicos.portal.enviarDocumento(clienteId, documento.id, arquivo),
     onSuccess: () => {
       void clienteConsulta.invalidateQueries({ queryKey: chaves.portal.todos })
       toast.success('Documento enviado', {

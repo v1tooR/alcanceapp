@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Navigate, createBrowserRouter } from 'react-router-dom'
 import { AppShell, PortalShell } from '@/components/layout/app-shell'
-import { RotaProtegida, RotaPublica } from '@/components/layout/rota-protegida'
+import { ExigePermissao, RotaProtegida, RotaPublica } from '@/components/layout/rota-protegida'
 import { CarregandoPagina } from '@/components/ui/estados'
 import { rotaInicial } from '@/lib/permissoes'
 import { usarSessao } from '@/stores/sessao'
@@ -15,6 +15,7 @@ import { usarSessao } from '@/stores/sessao'
 
 const Entrar = React.lazy(() => import('@/features/autenticacao/pages/entrar'))
 const RecuperarSenha = React.lazy(() => import('@/features/autenticacao/pages/recuperar-senha'))
+const DefinirSenha = React.lazy(() => import('@/features/autenticacao/pages/definir-senha'))
 const NaoEncontrado = React.lazy(() => import('@/pages/nao-encontrado'))
 
 const Painel = React.lazy(() => import('@/features/painel/pages/painel'))
@@ -30,6 +31,7 @@ const Notificacoes = React.lazy(() => import('@/features/notificacoes/pages/noti
 const Financeiro = React.lazy(() => import('@/features/financeiro/pages/financeiro'))
 const Equipe = React.lazy(() => import('@/features/equipe/pages/equipe'))
 const Configuracoes = React.lazy(() => import('@/features/configuracoes/pages/configuracoes'))
+const Integracoes = React.lazy(() => import('@/features/integracoes/pages/integracoes'))
 
 const PortalInicio = React.lazy(() => import('@/features/portal/pages/inicio'))
 const PortalProcessos = React.lazy(() => import('@/features/portal/pages/processos'))
@@ -74,6 +76,16 @@ export const roteador = createBrowserRouter([
       </RotaPublica>
     ),
   },
+  // Destino dos links de convite e recuperação: chega já com sessão temporária,
+  // por isso não passa pela RotaPublica (que redirecionaria quem está logado).
+  {
+    path: '/definir-senha',
+    element: (
+      <ComCarregamento>
+        <DefinirSenha />
+      </ComCarregamento>
+    ),
+  },
 
   {
     element: <RotaProtegida area="equipe" />,
@@ -92,9 +104,10 @@ export const roteador = createBrowserRouter([
           { path: 'documentos', element: <Documentos /> },
           { path: 'calendario', element: <Calendario /> },
           { path: 'notificacoes', element: <Notificacoes /> },
-          { path: 'financeiro', element: <Financeiro /> },
-          { path: 'equipe', element: <Equipe /> },
-          { path: 'configuracoes', element: <Configuracoes /> },
+          { path: 'financeiro', element: <ExigePermissao permissao="financeiro.ver"><Financeiro /></ExigePermissao> },
+          { path: 'equipe', element: <ExigePermissao permissao="equipe.ver"><Equipe /></ExigePermissao> },
+          { path: 'configuracoes', element: <ExigePermissao permissao="configuracoes.ver"><Configuracoes /></ExigePermissao> },
+          { path: 'integracoes', element: <ExigePermissao permissao="integracoes.ver"><Integracoes /></ExigePermissao> },
         ],
       },
     ],

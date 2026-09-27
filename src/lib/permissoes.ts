@@ -28,6 +28,7 @@ export const PERMISSOES = [
   'equipe.ver',
   'equipe.editar',
   'configuracoes.ver',
+  'integracoes.ver',
   'dados.internos.ver',
   'portal.ver',
 ] as const

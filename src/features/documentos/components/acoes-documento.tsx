@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { CheckCircle2, Eye, EyeOff, MoreVertical, RotateCcw, Search, XCircle } from 'lucide-react'
+import { CheckCircle2, Eye, EyeOff, FileSearch, MoreVertical, RotateCcw, Search, XCircle } from 'lucide-react'
 import { Campo } from '@/components/shared/campo'
 import { Button } from '@/components/ui/button'
 import {
@@ -83,6 +83,21 @@ export function AcoesDocumento({
     onError: (falha) => toast.error(mensagemErroSegura(falha)),
   })
 
+  // A URL é temporária e o acesso fica registrado na auditoria. A janela abre
+  // já no clique (evita bloqueio de pop-up) e recebe a URL quando ela chega.
+  async function abrirArquivo() {
+    const janela = window.open('', '_blank')
+    if (janela) janela.opener = null
+    try {
+      const url = await servicos.documentos.abrirArquivo(documento.id)
+      if (janela) janela.location.href = url
+      else window.location.assign(url)
+    } catch (falha) {
+      janela?.close()
+      toast.error(mensagemErroSegura(falha, 'Não foi possível abrir o arquivo.'))
+    }
+  }
+
   const podeAprovar = podeMudarStatusDocumento(documento.status, 'aprovado')
   const podeReprovar = podeMudarStatusDocumento(documento.status, 'reprovado')
   const podePedirReenvio = podeMudarStatusDocumento(documento.status, 'reenvio_solicitado')
@@ -113,6 +128,12 @@ export function AcoesDocumento({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
+            {documento.arquivoDisponivel && (
+              <DropdownMenuItem onSelect={() => void abrirArquivo()}>
+                <FileSearch />
+                Abrir arquivo
+              </DropdownMenuItem>
+            )}
             {podeAnalisar && documento.status === 'enviado' && (
               <DropdownMenuItem onSelect={() => analisar.mutate()}>
                 <Search />

@@ -1,12 +1,12 @@
 import * as React from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { usarTempoReal } from '@/app/usar-tempo-real'
 import { BottomNav } from '@/components/layout/bottom-nav'
 import { Header } from '@/components/layout/header'
 import { Sidebar } from '@/components/layout/sidebar'
 import { NAVEGACAO_CLIENTE, NAVEGACAO_EQUIPE, type ItemNavegacao } from '@/components/layout/navegacao'
 import { CarregandoPagina } from '@/components/ui/estados'
-import { AvisoDadosSimulados } from '@/components/layout/aviso-dados-simulados'
 import { cn } from '@/lib/utils'
 import { chaves } from '@/services/chaves'
 import { servicos } from '@/services'
@@ -30,8 +30,10 @@ function Casca({ itens }: { itens: ItemNavegacao[] }) {
     queryKey: chaves.notificacoes.naoLidas(usuario?.id ?? ''),
     queryFn: () => servicos.notificacoes.contarNaoLidas(usuario!.id),
     enabled: Boolean(usuario),
-    refetchInterval: 60_000,
   })
+
+  // Notificações, filas e listas se atualizam sozinhas (Supabase Realtime).
+  usarTempoReal(usuario)
 
   const principalRef = React.useRef<HTMLElement>(null)
 
@@ -71,7 +73,6 @@ function Casca({ itens }: { itens: ItemNavegacao[] }) {
           className="relative flex-1 overflow-y-auto overflow-x-hidden pb-[calc(var(--bottom-nav-height)+1rem)] focus:outline-none lg:pb-6"
         >
           <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6">
-            <AvisoDadosSimulados />
             <React.Suspense fallback={<CarregandoPagina />}>
               <Outlet />
             </React.Suspense>

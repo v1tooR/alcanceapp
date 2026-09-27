@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { CarregandoPagina } from '@/components/ui/estados'
-import { ehCliente, ehEquipe, rotaInicial } from '@/lib/permissoes'
+import { ShieldAlert } from 'lucide-react'
+import { CarregandoPagina, EstadoVazio } from '@/components/ui/estados'
+import { ehCliente, ehEquipe, rotaInicial, temPermissao, type Permissao } from '@/lib/permissoes'
 import { usarSessao } from '@/stores/sessao'
 
 /**
@@ -36,5 +37,24 @@ export function RotaPublica({ children }: { children: React.ReactNode }) {
   if (inicializando) return <CarregandoPagina rotulo="Carregando" />
   if (usuario) return <Navigate to={rotaInicial(usuario.papel)} replace />
 
+  return <>{children}</>
+}
+
+/**
+ * Tela restrita a uma permissão (ex.: financeiro, equipe). Quem chega pela URL
+ * sem permissão vê o aviso em vez de uma tela vazia — os dados já são negados
+ * pela RLS no servidor.
+ */
+export function ExigePermissao({ permissao, children }: { permissao: Permissao; children: React.ReactNode }) {
+  const papel = usarSessao((estado) => estado.usuario?.papel)
+  if (!temPermissao(papel, permissao)) {
+    return (
+      <EstadoVazio
+        icone={ShieldAlert}
+        titulo="Acesso restrito"
+        descricao="Seu nível de acesso não inclui esta área. Fale com a coordenação se precisar dela."
+      />
+    )
+  }
   return <>{children}</>
 }

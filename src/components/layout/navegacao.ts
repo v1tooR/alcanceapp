@@ -5,6 +5,7 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
+  Plug,
   Settings,
   UserCircle,
   Users,
@@ -99,6 +100,13 @@ export const NAVEGACAO_EQUIPE: ItemNavegacao[] = [
     rotuloCurto: 'Config.',
     icone: Settings,
     permissao: 'configuracoes.ver',
+    grupo: 'gestao',
+  },
+  {
+    para: '/app/integracoes',
+    rotulo: 'Integrações',
+    icone: Plug,
+    permissao: 'integracoes.ver',
     grupo: 'gestao',
   },
 ]

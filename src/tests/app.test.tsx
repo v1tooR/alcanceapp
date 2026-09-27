@@ -1,7 +1,23 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App } from '@/App'
+
+// Dublê do cliente Supabase: sem sessão e com credenciais sempre recusadas,
+// como o servidor responde. O teste não depende de rede nem de banco.
+vi.mock('@/services/supabase/cliente', () => {
+  const cliente = {
+    auth: {
+      getSession: async () => ({ data: { session: null }, error: null }),
+      signInWithPassword: async () => ({
+        data: { session: null, user: null },
+        error: { status: 400, code: 'invalid_credentials', message: 'Invalid login credentials' },
+      }),
+      signOut: async () => ({ error: null }),
+    },
+  }
+  return { supabase: () => cliente }
+})
 
 /**
  * Teste de fumaça da aplicação inteira.

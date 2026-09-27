@@ -8,12 +8,14 @@ import { Campo } from '@/components/shared/campo'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { mensagemErroSegura } from '@/lib/privacidade'
 import { esquemaRecuperacao, type DadosRecuperacao } from '@/schemas'
 import { servicos } from '@/services'
 
 export default function RecuperarSenha() {
   const [enviado, setEnviado] = React.useState(false)
   const [enviando, setEnviando] = React.useState(false)
+  const [erro, setErro] = React.useState<string | null>(null)
 
   const {
     register,
@@ -26,9 +28,12 @@ export default function RecuperarSenha() {
 
   async function aoEnviar(dados: DadosRecuperacao) {
     setEnviando(true)
+    setErro(null)
     try {
       await servicos.autenticacao.solicitarRecuperacaoSenha(dados.email)
       setEnviado(true)
+    } catch (falha) {
+      setErro(mensagemErroSegura(falha, 'Não foi possível enviar agora. Tente novamente.'))
     } finally {
       setEnviando(false)
     }
@@ -65,6 +70,8 @@ export default function RecuperarSenha() {
       rodape={voltar}
     >
       <form onSubmit={handleSubmit(aoEnviar)} className="space-y-4" noValidate>
+        {erro && <Alert tom="perigo">{erro}</Alert>}
+
         <Campo rotulo="E-mail" erro={errors.email?.message} obrigatorio>
           {(campo) => (
             <Input

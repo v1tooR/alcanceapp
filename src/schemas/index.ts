@@ -249,3 +249,19 @@ export const esquemaUsuario = z.object({
   ativo: z.boolean(),
 })
 export type DadosUsuario = z.infer<typeof esquemaUsuario>
+
+/* -- Nova senha (convite e recuperação) ------------------------------------- */
+
+export const esquemaNovaSenha = z
+  .object({
+    senha: z
+      .string()
+      .min(8, 'Use ao menos 8 caracteres.')
+      .max(72, 'Máximo de 72 caracteres.'),
+    confirmacao: z.string().min(1, 'Repita a senha.'),
+  })
+  .refine((dados) => dados.senha === dados.confirmacao, {
+    message: 'As senhas não conferem.',
+    path: ['confirmacao'],
+  })
+export type DadosNovaSenha = z.infer<typeof esquemaNovaSenha>

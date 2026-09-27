@@ -1,112 +1,100 @@
-# Integrações necessárias para entrar em operação
+# Integrações e o que falta para operação
 
-O front-end está pronto e funcional sobre uma **base fictícia em memória**. Para
-o Web App entrar em operação real, os itens abaixo precisam ser implementados e
-validados. Nenhum deles é entregável apenas de front-end.
-
-> A troca é feita sem reescrever páginas: elas dependem só dos contratos em
-> `src/services/contratos.ts`. Basta `VITE_MODO_DADOS=api` e completar
-> `src/services/http/index.ts`.
+O front-end está ligado ao Supabase self-hosted (ver [backend.md](backend.md)).
+Este documento lista a situação de cada integração e o que ainda precisa
+acontecer fora do código antes da operação real.
 
 ---
 
 ## 1. Autenticação e sessão
 
-| Item | Situação | O que falta |
-|------|----------|-------------|
-| Login por e-mail e senha | Simulado | Provedor real (ex.: Supabase Auth, Auth0, Cognito) ou serviço próprio |
-| Sessão | `sessionStorage` com o id do usuário, só no adaptador simulado | Cookie `httpOnly` + `Secure` + `SameSite`, com renovação e expiração |
-| Recuperação de senha | Tela pronta, resposta genérica | Envio real de e-mail com token de uso único e expiração curta |
-| Primeiro acesso do cliente | Não implementado | Fluxo de convite e definição de senha |
-| Autenticação em duas etapas | Não implementado | Recomendada para perfis com acesso a dados sensíveis |
-
-**Importante:** a proteção de rotas em `src/components/layout/rota-protegida.tsx`
-e as permissões em `src/lib/permissoes.ts` são **de interface**. Elas não
-substituem autorização no servidor.
+| Item | Situação |
+|------|----------|
+| Login por e-mail e senha | Supabase Auth |
+| Sessão | JWT do Supabase no `sessionStorage` (some ao fechar a aba), renovação automática |
+| Recuperação de senha | E-mail com link de uso único → `/definir-senha` |
+| Primeiro acesso (cliente e equipe) | Convite por e-mail → `/definir-senha` |
+| Desativar conta | Perfil inativo + bloqueio no Auth; a RLS corta o acesso na hora |
+| Autenticação em duas etapas | **Não implementada** — o GoTrue suporta TOTP; exige telas novas |
 
 ## 2. API e banco de dados
 
-| Item | Situação | O que falta |
-|------|----------|-------------|
-| Endpoints | Especificados em `src/services/http/index.ts` | Implementação no backend |
-| Autorização por papel | Apenas na interface | Regras no servidor (ex.: RLS por `cliente_id` e por papel) |
-| Isolamento do cliente | Simulado no adaptador | Garantia no servidor de que o cliente só lê os próprios dados |
-| Paginação, filtros e ordenação | Feitos em memória | Fazer no banco, com índices adequados |
-| Auditoria | Movimentações registradas na aplicação | Trilha de auditoria imutável no servidor (quem alterou o quê e quando) |
+| Item | Situação |
+|------|----------|
+| Endpoints | PostgREST + RPCs + Edge Functions (backend.md) |
+| Autorização por papel | RLS em todas as tabelas |
+| Isolamento do cliente | Cliente sem leitura direta; RPCs `portal_*` com o recorte dele |
+| Paginação, filtros e ordenação | No banco, padrão único (backend.md) |
+| Auditoria | `audit_log` imutável |
 
-Contrato de erro esperado pelo front-end:
-
-```json
-{ "mensagem": "Texto já revisado para o usuário", "exibivel": true }
-```
-
-Sem `exibivel: true`, a interface mostra uma mensagem genérica — para não expor
-detalhes internos nem dados pessoais na tela.
+Contrato de erro das Edge Functions: `{ "mensagem": "...", "exibivel": true }`.
+Erros de regra do banco usam SQLSTATE `AL4xx` com mensagem exibível. O resto
+vira mensagem genérica na interface.
 
 ## 3. Armazenamento de arquivos
 
-| Item | Situação | O que falta |
-|------|----------|-------------|
-| Upload | Apenas metadados (nome, tamanho, tipo) | URL assinada com expiração curta |
-| Download/visualização | Não implementado | URL assinada por requisição, nunca link público |
-| Validação de arquivo | Tamanho e tipo conferidos na tela | Conferência no servidor + verificação de conteúdo real |
-| Antivírus | Não implementado | Obrigatório antes de disponibilizar o arquivo à equipe |
-| Criptografia em repouso | Não implementado | Obrigatória — há laudos e dados de saúde |
-| Retenção e exclusão | Não definida | Política de retenção e rotina de exclusão |
+| Item | Situação | Falta |
+|------|----------|-------|
+| Upload | Bucket privado `documents`; policy só aceita o cliente dono de documento aberto para envio, ou a equipe | — |
+| Download | URL assinada de 60 s pela Edge Function `document-file`, com auditoria | — |
+| Validação | Formato e tamanho no bucket, na função e no banco | — |
+| Antivírus | Adapter ClamAV pronto, **desligado** | Subir `--profile antivirus` e ligar na tela de integrações |
+| Criptografia em repouso | Depende do disco do servidor | Volume criptografado ou backend S3 com SSE |
+| Retenção e exclusão | Não definida | Política e rotina |
 
-## 4. Notificações
+## 4. E-mail
 
-| Item | Situação | O que falta |
-|------|----------|-------------|
-| Notificações internas | Funcionais na aplicação | Persistência no banco |
-| Atualização em tempo real | Consulta periódica (60 s) | WebSocket / realtime, se desejado |
-| E-mail e mensagens externas | **Fora de escopo** | Só com aprovação prévia |
+| Item | Situação | Falta |
+|------|----------|-------|
+| Convites e recuperação | SMTP do Supabase Auth; em desenvolvimento, Mailpit (http://localhost:8025) | Provedor SMTP real em `docker/.env` (`SMTP_*`) |
+| Modelos | Padrão do GoTrue, assuntos em pt-BR | Modelos próprios (`GOTRUE_MAILER_TEMPLATES_*`), se desejado |
+| Mensagens externas automáticas | **Fora de escopo** | Só com aprovação prévia |
 
-## 5. PWA
+## 5. Notificações e tempo real
 
-| Item | Situação | O que falta |
-|------|----------|-------------|
-| Manifesto e instalação | Configurados | Ícone `maskable` gerado a partir do kit de marca |
-| Service worker | Pré-cache apenas do casco (JS/CSS/ícones) | — |
-| Uso offline de processos e documentos | **Deliberadamente não implementado** | Depende de definição técnica e validação de segurança específicas |
+Notificações persistidas no banco e entregues em tempo real (Supabase Realtime,
+canais privados). As filas, listas e o portal também se atualizam sozinhos.
 
-## 6. Privacidade e conformidade (LGPD)
+## 6. PWA
 
-O sistema trata dados pessoais sensíveis (saúde e deficiência). Antes da
-operação real:
+Inalterado: manifesto e pré-cache apenas do casco. Uso offline de processos e
+documentos continua **deliberadamente não implementado**.
 
-- base legal e finalidade documentadas para cada dado coletado;
-- política de privacidade e termo de uso publicados e aceitos no primeiro acesso;
-- controle de acesso por papel aplicado no servidor;
-- registro de acesso a documentos sensíveis;
+## 7. Privacidade e conformidade (LGPD)
+
+Já no sistema: RLS por papel e por cliente, dado de saúde em tabela própria,
+registro de acesso a arquivos, auditoria de alterações, mascaramento na
+interface. Ainda fora do código:
+
+- base legal e finalidade documentadas para cada dado;
+- política de privacidade e termo de uso aceitos no primeiro acesso;
 - política de retenção, anonimização e exclusão;
 - plano de resposta a incidentes;
-- contrato com os operadores (hospedagem, armazenamento, autenticação).
+- contratos com os operadores (hospedagem, SMTP).
 
-Já implementado na interface, como apoio: mascaramento de CPF/e-mail/telefone,
-exibição de dado sensível só após ação explícita, descrição genérica de
-documentos sensíveis em notificações e histórico, e mensagens de erro que não
-vazam conteúdo.
-
-## 7. Hospedagem e operação
+## 8. Hospedagem
 
 | Item | O que falta |
 |------|-------------|
-| Domínio e HTTPS | Definir domínio do app e certificado |
-| Cabeçalhos de segurança | CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy` |
-| Backup e restauração | Rotina e teste de restauração |
-| Monitoramento | Erros, disponibilidade e alertas |
-| Ambientes | Separar homologação de produção |
+| Servidor do Supabase | Máquina com Docker, domínio e HTTPS (ex.: proxy Caddy/Nginx do compose oficial) |
+| Front | Vercel (ou similar) com `VITE_SUPABASE_URL` público |
+| Segredos | `npm run env:setup` no servidor; `SITE_URL` e `ADDITIONAL_REDIRECT_URLS` com o domínio real |
+| Backup | Rotina de `pg_dump` + volume de arquivos, com teste de restauração |
+| Monitoramento | Logs, disponibilidade e alertas |
+| Ambientes | Homologação separada de produção |
 
 ---
 
-## Checklist mínimo antes de considerar o sistema em operação
+## Checklist antes de considerar o sistema em operação
 
-- [ ] Autenticação real e sessão segura
-- [ ] Autorização por papel aplicada no servidor
-- [ ] Isolamento verificado: cliente não acessa dados de terceiros
-- [ ] Upload com URL assinada, validação, antivírus e criptografia
-- [ ] Dados reais migrados e conferidos
+- [x] Autenticação real e sessão segura
+- [x] Autorização por papel aplicada no servidor
+- [x] Isolamento verificado: cliente não acessa dados de terceiros
+- [x] Upload com URL assinada e validação
+- [ ] Antivírus ligado e criptografia em repouso
+- [ ] SMTP real configurado
+- [ ] Supabase hospedado com HTTPS, backup e monitoramento
+- [ ] Dados reais migrados e conferidos (após `npm run db:reset:prod`)
 - [ ] Testes do fluxo completo com a equipe, em homologação
 - [ ] Itens de `docs/duvidas-de-negocio.md` respondidos
 - [ ] Conformidade LGPD revisada
