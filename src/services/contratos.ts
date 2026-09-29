@@ -465,6 +465,8 @@ export interface ServicoUsuarios {
   criar(dados: EntradaUsuario): Promise<Usuario>
   atualizar(id: ID, dados: Partial<EntradaUsuario>): Promise<Usuario>
   definirAtivo(id: ID, ativo: boolean): Promise<Usuario>
+  /** A pessoa logada (equipe) altera o próprio nome. */
+  atualizarMeuNome(nome: string): Promise<Usuario>
 }
 
 /* ========================================================================== */

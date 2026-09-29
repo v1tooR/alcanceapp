@@ -2,7 +2,7 @@ import type { ServicoUsuarios } from '@/services/contratos'
 import type { Usuario } from '@/types/domain'
 import type { Tables } from './database.types'
 import { supabase } from './cliente'
-import { exigir } from './erros'
+import { conferir, exigir } from './erros'
 import { invocar } from './funcoes'
 import { paraUsuario } from './mapeadores'
 
@@ -43,6 +43,13 @@ export function criarUsuarios(): ServicoUsuarios {
 
     async definirAtivo(id, ativo) {
       return paraUsuario(await invocar<Tables<'profiles'>>('admin-users', { acao: 'definir_ativo', id, ativo }))
+    },
+
+    // Só o nome da própria conta; papel e ativação continuam com o administrador.
+    async atualizarMeuNome(nome) {
+      conferir(await supabase().rpc('update_my_profile', { p_full_name: nome.trim() }))
+      const { data } = await supabase().auth.getUser()
+      return paraUsuario(exigir(await supabase().from('profiles').select('*').eq('id', data.user?.id ?? '').maybeSingle()))
     },
   }
 }

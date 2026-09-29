@@ -1,5 +1,6 @@
 import { Database, Monitor, Moon, PanelLeft, Sun } from 'lucide-react'
 import { PageHeader } from '@/components/shared/page-header'
+import { MeuNome } from '@/features/configuracoes/components/meu-nome'
 import { EntradaPagina } from '@/components/shared/animacao'
 import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -90,12 +91,7 @@ export default function Configuracoes() {
           <CardBarra titulo="Minha conta" />
           <CardContent className="pt-4">
             <dl className="space-y-3 text-sm">
-              <div>
-                <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Nome
-                </dt>
-                <dd className="mt-0.5">{usuario?.nome}</dd>
-              </div>
+              <MeuNome />
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   E-mail

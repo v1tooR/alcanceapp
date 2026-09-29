@@ -13,6 +13,8 @@ interface EstadoSessao {
   entrar: (credenciais: Credenciais) => Promise<Usuario>
   sair: () => Promise<void>
   limparErro: () => void
+  /** Atualiza os dados da pessoa logada sem refazer a sessão. */
+  atualizarUsuario: (usuario: Usuario) => void
 }
 
 /**
@@ -60,6 +62,8 @@ export const usarSessao = create<EstadoSessao>()((definir) => ({
   },
 
   limparErro: () => definir({ erro: null }),
+
+  atualizarUsuario: (usuario) => definir({ usuario }),
 }))
 
 /** Atalho para o papel do usuário logado. */

@@ -63,7 +63,8 @@ V = ver · C = criar · E = editar · X = excluir (lógico)
 | Calendário | V C E X | V C E X | V C E X | V eventos visíveis, próprios |
 | Financeiro | V C E X | V C E X | — | — |
 | Equipe | V C E | V | — | — |
-| Configurações | V | — | — | — |
+| Configurações (preferências e minha conta) | V | V | V | — |
+| Próprio nome (Minha conta) | E | E | E | — (vem do cadastro) |
 | Integrações | V E | — | — | — |
 | Auditoria (`audit_log`) | V (SQL/Studio) | — | — | — |
 

@@ -265,3 +265,10 @@ export const esquemaNovaSenha = z
     path: ['confirmacao'],
   })
 export type DadosNovaSenha = z.infer<typeof esquemaNovaSenha>
+
+/* -- Minha conta ------------------------------------------------------------- */
+
+export const esquemaMeuNome = z.object({
+  nome: textoObrigatorio('o nome', 3).max(160, 'Máximo de 160 caracteres.'),
+})
+export type DadosMeuNome = z.infer<typeof esquemaMeuNome>

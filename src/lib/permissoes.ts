@@ -60,8 +60,9 @@ const MAPA_PERMISSOES: Record<PapelUsuario, readonly Permissao[]> = {
     'financeiro.ver',
     'financeiro.editar',
     'equipe.ver',
+    'configuracoes.ver',
   ],
-  analista: PERMISSOES_OPERACIONAIS,
+  analista: [...PERMISSOES_OPERACIONAIS, 'configuracoes.ver'],
   cliente: ['portal.ver'],
 }
 
