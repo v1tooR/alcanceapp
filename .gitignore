@@ -9,3 +9,6 @@ coverage
 .DS_Store
 *.tsbuildinfo
 .vite
+
+# Pacotes para envio à hospedagem (gerados pelo build)
+deploy

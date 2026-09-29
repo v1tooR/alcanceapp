@@ -129,11 +129,27 @@ Todas dependem de `servicos` (`src/services/index.ts`), que implementa os
 contratos de `src/services/contratos.ts` com o adaptador em
 `src/services/supabase/`.
 
-**Publicação na Vercel:** `vercel.json` devolve o `index.html` para qualquer
-rota, para que recarregar `/app/processos` não dê 404. Defina
-`VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` apontando para um Supabase
-acessível pela internet (o Docker local não serve a Vercel). Variáveis `VITE_*`
-são lidas no build: depois de mudar uma delas, faça um novo deploy.
+### Publicação (produção)
+
+- **Supabase:** projeto `webapp` na organização Alcance Isenções, região São Paulo
+  (`sa-east-1`). Migrations de `supabase/migrations/`, seed de produção e as 5
+  Edge Functions já aplicados. Configurações feitas **no painel** do Supabase:
+  *Authentication → URL Configuration* (Site URL `https://app.alcanceisencoes.com.br`
+  e redirecionamento `https://app.alcanceisencoes.com.br/**`), cadastro público
+  desligado e SMTP próprio.
+- **App:** Hostinger, em `app.alcanceisencoes.com.br`. O build lê
+  `.env.production.local` (fora do git, com `VITE_SUPABASE_URL` e a chave pública):
+
+  ```bash
+  npm run build
+  ```
+
+  Envie o **conteúdo** de `dist/` (inclusive o `.htaccess`, que é oculto) para
+  a pasta do subdomínio. O `.htaccess` força HTTPS, devolve o `index.html` para
+  as rotas do app e define cabeçalhos de segurança e de cache.
+- Variáveis `VITE_*` entram no build: mudou uma delas, gere e envie o `dist/` de novo.
+- No Supabase hospedado, o domínio dos links de convite vem de `site_url` na
+  integração de e-mail (tela Integrações); no Docker local, de `SITE_URL`.
 
 ### Design system
 

@@ -23,10 +23,15 @@ export function criarEmailSupabaseAuth(servico: SupabaseClient): ProvedorEmail {
     },
 
     async situacao() {
+      // Docker local: o host SMTP é repassado às funções só para exibição.
+      // Supabase hospedado: o SMTP fica no painel e não é visível daqui.
       const host = Deno.env.get('SMTP_HOST')
       return host
         ? { disponivel: true, detalhe: `SMTP configurado no serviço de autenticação (${host}).` }
-        : { disponivel: false, detalhe: 'SMTP_HOST não informado ao ambiente.' }
+        : {
+            disponivel: true,
+            detalhe: 'Envio pelo Supabase Auth. Confira o SMTP no painel do Supabase (Authentication → SMTP).',
+          }
     },
   }
 }

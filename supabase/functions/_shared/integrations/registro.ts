@@ -59,6 +59,19 @@ export async function obterEmail(servico: SupabaseClient) {
   return { registro, provedor: instanciar(PROVEDORES_EMAIL, registro, servico) }
 }
 
+/**
+ * Endereço de destino dos links de convite (`/definir-senha`).
+ *
+ * Docker local: variável SITE_URL do serviço de funções. Supabase hospedado:
+ * `site_url` na configuração da integração de e-mail (o domínio não é segredo).
+ */
+export function linkDeConvite(registro: RegistroIntegracao): string {
+  const site = Deno.env.get('SITE_URL') || String(registro.config.site_url ?? '')
+  if (!site) throw new Error('Defina SITE_URL ou "site_url" na integração de e-mail.')
+  const caminho = String(registro.config.invite_redirect_path ?? '/definir-senha')
+  return `${site.replace(/\/$/, '')}${caminho}`
+}
+
 export async function obterArmazenamento(servico: SupabaseClient) {
   const registro = await carregarIntegracao(servico, 'storage')
   return { registro, provedor: instanciar(PROVEDORES_ARMAZENAMENTO, registro, servico) }

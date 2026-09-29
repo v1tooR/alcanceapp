@@ -8,7 +8,7 @@
  * Fica em Edge Function porque cria contas no Auth (service role).
  */
 import { ErroExibivel, naoEncontrado, servir, uuid } from '../_shared/http.ts'
-import { obterEmail } from '../_shared/integrations/registro.ts'
+import { linkDeConvite, obterEmail } from '../_shared/integrations/registro.ts'
 import { PAPEIS_EQUIPE, auditar, exigirPapel, identificarChamador } from '../_shared/supabase.ts'
 
 const BLOQUEIO_INDETERMINADO = '876000h'
@@ -57,10 +57,9 @@ servir(async (corpo, req) => {
       if (count) throw new ErroExibivel('O e-mail deste cliente já é usado por outra conta de acesso.', 409)
 
       const { registro, provedor } = await obterEmail(servico)
-      const caminho = String(registro.config.invite_redirect_path ?? '/definir-senha')
       const { usuarioId } = await provedor.convidar(cliente.email, {
         nome: cliente.full_name,
-        redirecionarPara: `${Deno.env.get('SITE_URL')}${caminho}`,
+        redirecionarPara: linkDeConvite(registro),
       })
 
       const { error } = await servico.from('profiles').insert({

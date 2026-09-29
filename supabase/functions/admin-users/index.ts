@@ -8,7 +8,7 @@
  * Fica em Edge Function porque mexe em contas do Auth (service role).
  */
 import { ErroExibivel, emailValido, naoEncontrado, servir, texto, uuid } from '../_shared/http.ts'
-import { obterEmail } from '../_shared/integrations/registro.ts'
+import { linkDeConvite, obterEmail } from '../_shared/integrations/registro.ts'
 import {
   type Chamador,
   type Papel,
@@ -95,10 +95,9 @@ servir(async (corpo, req) => {
       }
 
       const { registro, provedor } = await obterEmail(chamador.comoServico)
-      const caminho = String(registro.config.invite_redirect_path ?? '/definir-senha')
       const { usuarioId } = await provedor.convidar(dados.email!, {
         nome: dados.nome!,
-        redirecionarPara: `${Deno.env.get('SITE_URL')}${caminho}`,
+        redirecionarPara: linkDeConvite(registro),
       })
 
       const ativo = dados.ativo ?? true
